@@ -40,8 +40,10 @@ void loop() {
   Serial.print("Distance = ");
   Serial.println(distance);
   delay(400);
-  int landmineSensor1 = analogRead(A0);
-  int landmineSensor2 = analogRead(A1); 
+  int landmineSensor1 = analogRead(A0); // Photo resistor
+  int landmineSensor2 = analogRead(A1); // Photo resistor
+  int curState1 = 0; int futState1 = 0; // Photo resistor
+  int curState2 = 0; int futState2 = 0; // Photo resistor
   button = digitalRead(inpin);
   if(button == HIGH && !start) {
     delay(200);
@@ -92,6 +94,15 @@ void loop() {
         digitalWrite(redpin, HIGH);
         myservo.write(180);
         tone(buzzer, 1000, 500);
+          float cur_distance = distance;
+          if (distance <= cur_distance - 2 || distance >= cur_distance + 2) {
+            start = false;
+            sweep_servo.write(0); // write the 0 Deg angle to the servo
+            delay(2000); // delay 15ms
+            sweep_servo.write(90); // write the 90 Deg angle to the servo
+            lcd.clear();
+            lcd.print("GAME OVER");
+            }
       } 
       else {
         // RED -> GREEN
@@ -123,6 +134,26 @@ void loop() {
     lcd.clear();
     lcd.print("YOU WIN!");
   }
+// Landmine (Photoresistor) function 
+if (landmineSensor1 <= 300){
+      curState1 = landmineSensor1;
+      futState1 = analogRead(A0);
+      if (futState1 >= 1.10*curState1) {
+        myservo.write(90); // write the 90 Deg angle to the servo
+        delay(2000); // delay 2s
+        myservo.write(0); // write the 0 Deg angle to the servo
+      }
+    }
+
+    if (landmineSensor2 <= 300){
+      curState2 = landmineSensor2;
+      futState2 = analogRead(A1);
+      if (futState2 >= 1.10*curState2) {
+        myservo.write(90); // write the 90 Deg angle to the servo
+        delay(2000); // delay 2s
+        myservo.write(0); // write the 0 Deg angle to the servo
+      }
+    }
 }
 
 float readSensorData(){
