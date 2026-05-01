@@ -1,3 +1,4 @@
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
@@ -39,11 +40,13 @@ void loop() {
   float distance = readSensorData();
   Serial.print("Distance = ");
   Serial.println(distance);
-  delay(400);
   int landmineSensor1 = analogRead(A0); // Photo resistor
   int landmineSensor2 = analogRead(A1); // Photo resistor
   int curState1 = 0; int futState1 = 0; // Photo resistor
   int curState2 = 0; int futState2 = 0; // Photo resistor
+  Serial.println(landmineSensor1);
+  Serial.println(landmineSensor2);
+  delay(400);
   button = digitalRead(inpin);
   if(button == HIGH && !start) {
     delay(200);
@@ -94,16 +97,17 @@ void loop() {
         digitalWrite(redpin, HIGH);
         myservo.write(180);
         tone(buzzer, 1000, 500);
-          float cur_distance = distance;
-          if (distance <= cur_distance - 2 || distance >= cur_distance + 2) {
-            start = false;
-            sweep_servo.write(0); // write the 0 Deg angle to the servo
-            delay(2000); // delay 15ms
-            sweep_servo.write(90); // write the 90 Deg angle to the servo
-            lcd.clear();
-            lcd.print("GAME OVER");
-            }
+        float cur_distance = distance;
+        if (distance <= cur_distance - 2 || distance >= cur_distance + 2) {
+          start = false;
+          sweep_servo.write(0); // write the 0 Deg angle to the servo
+          delay(1000); // delay 15ms
+          sweep_servo.write(90); // write the 90 Deg angle to the servo
+          lcd.clear();
+          lcd.print("GAME OVER");
+        }
       } 
+      
       else {
         // RED -> GREEN
         canMove = true;
@@ -121,9 +125,14 @@ void loop() {
     float cur_distance = distance;
     if(distance <= cur_distance - 2 || distance >= cur_distance + 2) {
       start = false;
-      sweep_servo.write(0); // write the 0 Deg angle to the servo
-      delay(2000); // delay 15ms
-      sweep_servo.write(90); // write the 90 Deg angle to the servo
+      for (int i = 90; i >= 0; i--) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
+      }
+      for (int i = 0; i <= 90; i++) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
+      }
       lcd.clear();
       lcd.print("GAME OVER");
     }
@@ -134,26 +143,42 @@ void loop() {
     lcd.clear();
     lcd.print("YOU WIN!");
   }
-// Landmine (Photoresistor) function 
-if (landmineSensor1 <= 300){
-      curState1 = landmineSensor1;
-      futState1 = analogRead(A0);
-      if (futState1 >= 1.10*curState1) {
-        sweep_servo.write(90); // write the 90 Deg angle to the servo
-        delay(2000); // delay 2s
-        sweep_servo.write(0); // write the 0 Deg angle to the servo
+  // Landmine (Photoresistor) function 
+  if (start == true && landmineSensor1 <= 600){
+    curState1 = landmineSensor1;
+    futState1 = analogRead(A0);
+    if (futState1 >= 1.10*curState1) {
+      start = false;
+      for (int i = 90; i >= 0; i--) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
       }
+      for (int i = 0; i <= 90; i++) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
+      }
+      lcd.clear();
+      lcd.print("GAME OVER");
     }
+  }
 
-    if (landmineSensor2 <= 300){
-      curState2 = landmineSensor2;
-      futState2 = analogRead(A1);
-      if (futState2 >= 1.10*curState2) {
-        sweep_servo.write(90); // write the 90 Deg angle to the servo
-        delay(2000); // delay 2s
-        sweep_servo.write(0); // write the 0 Deg angle to the servo
+  if (start == true && landmineSensor2 <= 600){
+    curState2 = landmineSensor2;
+    futState2 = analogRead(A1);
+    if (futState2 >= 1.10*curState2) {
+      start = false;
+      for (int i = 90; i >= 0; i--) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
       }
+      for (int i = 0; i <= 90; i++) {
+        sweep_servo.write(i); //write the i angle to the servo
+        delay(10);
+      }
+      lcd.clear();
+      lcd.print("GAME OVER");
     }
+  }
 }
 
 float readSensorData(){
