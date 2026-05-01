@@ -1,0 +1,136 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+Servo myservo;//create servo object to control a servo
+Servo sweep_servo; //create sweep servo object to control the second servo
+LiquidCrystal_I2C lcd(0x27,16,2);
+int greenpin = 11 ;
+int redpin = 10;
+int inpin = 2;
+bool start = false;
+bool canMove = false;
+int button;
+int timer = 60;
+int buzzer = 3;
+unsigned long previousMs = 0;
+unsigned long interval = 3000; // start with red (3s)
+unsigned long lastSecond = 0;
+const int echoPin = 7;
+const int trigPin = 8;
+
+void setup() {
+  lcd.init(); // initialize the lcd 
+  lcd.clear();
+  lcd.backlight();
+  Serial.begin(9600);
+  pinMode(greenpin, OUTPUT);
+  pinMode(redpin, OUTPUT);
+  pinMode(inpin, INPUT);
+  myservo.attach(12); // attaches the servo on pin 5 to servo object
+  myservo.write(180); // start facing backwards
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+  sweep_servo.attach(5); // attaches second servo on pin 9
+  sweep_servo.write(90); //start at 90 degrees
+}
+
+void loop() {
+  float distance = readSensorData();
+  Serial.print("Distance = ");
+  Serial.println(distance);
+  delay(400);
+  int landmineSensor1 = analogRead(A0);
+  int landmineSensor2 = analogRead(A1); 
+  button = digitalRead(inpin);
+  if(button == HIGH && !start) {
+    delay(200);
+    start = true;
+    timer = 60;
+    previousMs = millis();
+    lastSecond = millis();
+    digitalWrite(greenpin, LOW); // start red
+    digitalWrite(redpin, HIGH);
+    myservo.write(180);
+    tone(buzzer, 1000, 500);
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Time: ");
+    lcd.print(timer);
+  }
+
+  if(start && timer > 0) {
+    unsigned long currentMs = millis();
+    if(currentMs - lastSecond >= 1000) {
+      lastSecond = currentMs;
+      timer--;
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Time: ");
+      lcd.print(timer);
+      if(timer <= 0) {
+        start = false;
+
+        digitalWrite(greenpin, LOW);
+        digitalWrite(redpin, LOW);
+
+        lcd.clear();
+        lcd.print("GAME OVER");
+        timer = 60;
+      }
+    }
+    if(currentMs - previousMs >= interval) {
+      previousMs = currentMs;
+      
+      if(canMove) {
+        // GREEN -> RED
+        canMove = false;
+        interval = 3000;
+
+        digitalWrite(greenpin, LOW);
+        digitalWrite(redpin, HIGH);
+        myservo.write(180);
+        tone(buzzer, 1000, 500);
+      } 
+      else {
+        // RED -> GREEN
+        canMove = true;
+        interval = 2000;
+
+        digitalWrite(greenpin, HIGH);
+        digitalWrite(redpin, LOW);
+        myservo.write(0);
+        tone(buzzer, 5000, 500);
+      }
+    }
+  }
+
+  if(digitalRead(redpin) == HIGH) {
+    float cur_distance = distance;
+    if(distance <= cur_distance - 2 || distance >= cur_distance + 2) {
+      start = false;
+      sweep_servo.write(0); // write the 0 Deg angle to the servo
+      delay(2000); // delay 15ms
+      sweep_servo.write(90); // write the 90 Deg angle to the servo
+      lcd.clear();
+      lcd.print("GAME OVER");
+    }
+  }
+
+  if (start == true && distance <= 5) {
+    start = false;
+    lcd.clear();
+    lcd.print("YOU WIN!");
+  }
+}
+
+float readSensorData(){
+  digitalWrite(trigPin, LOW); 
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);  
+  float distance = pulseIn(echoPin, HIGH)/58.00;  //Equivalent to (340m/s*1us)/2
+  return distance;
+}
