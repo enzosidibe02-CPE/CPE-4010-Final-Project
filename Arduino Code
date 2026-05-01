@@ -97,15 +97,6 @@ void loop() {
         digitalWrite(redpin, HIGH);
         myservo.write(180);
         tone(buzzer, 1000, 500);
-        float cur_distance = distance;
-        if (distance <= cur_distance - 2 || distance >= cur_distance + 2) {
-          start = false;
-          sweep_servo.write(0); // write the 0 Deg angle to the servo
-          delay(1000); // delay 15ms
-          sweep_servo.write(90); // write the 90 Deg angle to the servo
-          lcd.clear();
-          lcd.print("GAME OVER");
-        }
       } 
       
       else {
@@ -121,9 +112,11 @@ void loop() {
     }
   }
 
-  if(digitalRead(redpin) == HIGH) {
+  if(canMove = false) {
     float cur_distance = distance;
-    if(distance <= cur_distance - 2 || distance >= cur_distance + 2) {
+    delay(500);
+  }
+    if (canMove = false && distance <= cur_distance - 2 || distance >= cur_distance + 2) {
       start = false;
       for (int i = 90; i >= 0; i--) {
         sweep_servo.write(i); //write the i angle to the servo
@@ -136,7 +129,6 @@ void loop() {
       lcd.clear();
       lcd.print("GAME OVER");
     }
-  }
 
   if (start == true && distance <= 5) {
     start = false;
