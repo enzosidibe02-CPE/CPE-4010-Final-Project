@@ -139,9 +139,9 @@ if (landmineSensor1 <= 300){
       curState1 = landmineSensor1;
       futState1 = analogRead(A0);
       if (futState1 >= 1.10*curState1) {
-        myservo.write(90); // write the 90 Deg angle to the servo
+        sweep_servo.write(90); // write the 90 Deg angle to the servo
         delay(2000); // delay 2s
-        myservo.write(0); // write the 0 Deg angle to the servo
+        sweep_servo.write(0); // write the 0 Deg angle to the servo
       }
     }
 
@@ -149,9 +149,9 @@ if (landmineSensor1 <= 300){
       curState2 = landmineSensor2;
       futState2 = analogRead(A1);
       if (futState2 >= 1.10*curState2) {
-        myservo.write(90); // write the 90 Deg angle to the servo
+        sweep_servo.write(90); // write the 90 Deg angle to the servo
         delay(2000); // delay 2s
-        myservo.write(0); // write the 0 Deg angle to the servo
+        sweep_servo.write(0); // write the 0 Deg angle to the servo
       }
     }
 }
