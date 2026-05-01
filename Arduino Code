@@ -1,4 +1,3 @@
-
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
@@ -112,11 +111,11 @@ void loop() {
     }
   }
 
-  if(canMove = false) {
+  if(start == true && canMove == false) {
     float cur_distance = distance;
-    delay(500);
-  }
-    if (canMove = false && distance <= cur_distance - 2 || distance >= cur_distance + 2) {
+    float fut_distance = readSensorData();
+    delay(200);
+    if (fut_distance <= cur_distance - 2.5 || fut_distance >= cur_distance + 2.5) {
       start = false;
       for (int i = 90; i >= 0; i--) {
         sweep_servo.write(i); //write the i angle to the servo
@@ -129,6 +128,7 @@ void loop() {
       lcd.clear();
       lcd.print("GAME OVER");
     }
+  }
 
   if (start == true && distance <= 5) {
     start = false;
