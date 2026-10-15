@@ -90,10 +90,6 @@ An earlier working copy of the sketch used a different pin map and an `if (redpi
 - Median-of-three distance filtering, treat a 0 reading as "no echo", and require a valid reading before declaring a win.
 - Log movement and landmine events over serial to tune thresholds with data.
 
-## Preparation note
-
-The original sketch and the report are the team's coursework. This README, the host-side model, the tests and the figure were produced during portfolio preparation with AI assistance (Claude).
-
 ## License
 
 MIT for the original code (`LICENSE`).
